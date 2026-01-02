@@ -1,53 +1,33 @@
 package com.miniioc.core.context;
 
 import com.miniioc.core.annotation.*;
+import com.miniioc.core.factory.BeanFactory;
 import com.miniioc.core.lifecycle.BeanLifecycleProcessor;
 import com.miniioc.core.scanner.ComponentScanner;
 import com.miniioc.core.scanner.PackageScanner;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ApplicationContext {
 
-    private static final Logger logger = Logger.getLogger(ApplicationContext.class.getName());
-
     private final Map<Class<?>, BeanDefinition> beanDefinitions = new HashMap<>();
     private final BeanLifecycleProcessor lifecycleProcessor = new BeanLifecycleProcessor();
-    private final Map<ScopeType, BeanScopeHandler> scopeHandlers = new EnumMap<>(ScopeType.class);
-
-    public ApplicationContext() {
-        scopeHandlers.put(ScopeType.SINGLETON, new SingletonScopeHandler(lifecycleProcessor));
-        scopeHandlers.put(ScopeType.PROTOTYPE, new PrototypeScopeHandler(lifecycleProcessor));
-    }
+    private final BeanFactory beanFactory =
+            new BeanFactory(beanDefinitions, lifecycleProcessor);
 
     public void registerBean(Class<?> clazz, boolean lazy) {
-        BeanScopeHandler handler;
+        ScopeType scope = clazz.isAnnotationPresent(Scope.class)
+                ? clazz.getAnnotation(Scope.class).value()
+                : ScopeType.SINGLETON;
 
-        if (clazz.isAnnotationPresent(Scope.class)) {
-            ScopeType scope = clazz.getAnnotation(Scope.class).value();
-            handler = scopeHandlers.getOrDefault(scope, scopeHandlers.get(ScopeType.SINGLETON));
-        } else {
-            handler = scopeHandlers.get(ScopeType.SINGLETON);
-        }
-
-        beanDefinitions.put(clazz, new BeanDefinition(clazz, handler, lazy));
-
-        if (logger.isLoggable(Level.INFO)) {
-            logger.info(String.format("Registered bean: %s (lazy=%s, handler=%s)",
-                    clazz.getName(), lazy, handler.getClass().getSimpleName()));
-        }
+        beanDefinitions.put(clazz, new BeanDefinition(clazz, scope, lazy));
     }
 
-    public void initializeSingletons() throws Exception {
-        for (BeanDefinition bd : beanDefinitions.values()) {
-            if (!bd.isLazy() && bd.getInstance() == null) {
-                bd.getInstance(this);
-            }
-        }
+    public void initializeSingletons() {
+        beanDefinitions.values().stream()
+                .filter(bd -> bd.getScope() == ScopeType.SINGLETON && !bd.isLazy())
+                .forEach(bd -> getBean(bd.getBeanClass()));
     }
 
     public void scanPackage(String packageName) throws PackageScanException {
@@ -69,13 +49,11 @@ public class ApplicationContext {
         }
     }
 
-    public Object getBean(Class<?> clazz) throws Exception {
-        BeanDefinition bd = beanDefinitions.get(clazz);
-        if (bd == null) throw new BeanNotFoundException(clazz);
-        return bd.getInstance(this);
+    public Object getBean(Class<?> clazz) {
+        return beanFactory.getBean(clazz, this);
     }
 
-    Object createBean(Class<?> clazz) throws BeanCreationException {
+    public Object createBean(Class<?> clazz) {
         try {
             var constructor = clazz.getConstructors()[0];
             var paramTypes = constructor.getParameterTypes();
@@ -85,13 +63,12 @@ public class ApplicationContext {
                 paramInstances[i] = getBean(paramTypes[i]);
             }
 
-            Object instance = constructor.newInstance(paramInstances);
-            lifecycleProcessor.processPostConstruct(instance);
-            return instance;
+            return constructor.newInstance(paramInstances);
         } catch (Exception e) {
             throw new BeanCreationException("Failed to create bean: " + clazz.getName(), e);
         }
     }
+
 
     public Map<Class<?>, BeanDefinition> getBeanDefinitions() {
         return beanDefinitions;

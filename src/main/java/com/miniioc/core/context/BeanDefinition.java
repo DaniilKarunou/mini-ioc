@@ -1,35 +1,20 @@
 package com.miniioc.core.context;
 
+import com.miniioc.core.annotation.ScopeType;
+
 public class BeanDefinition {
 
     private final Class<?> beanClass;
+    private final ScopeType scope;
     private final boolean lazy;
-    private final BeanScopeHandler scopeHandler;
-    private Object instance;
 
-    public BeanDefinition(Class<?> beanClass, BeanScopeHandler scopeHandler, boolean lazy) {
+    public BeanDefinition(Class<?> beanClass, ScopeType scope, boolean lazy) {
         this.beanClass = beanClass;
-        this.scopeHandler = scopeHandler;
+        this.scope = scope;
         this.lazy = lazy;
     }
 
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public boolean isLazy() {
-        return lazy;
-    }
-
-    public Object getInstance(ApplicationContext context) throws Exception {
-        return scopeHandler.getInstance(this, context);
-    }
-
-    public void setInstance(Object instance) {
-        this.instance = instance;
-    }
-
-    public Object getInstance() {
-        return instance;
-    }
+    public Class<?> getBeanClass() { return beanClass; }
+    public ScopeType getScope() { return scope; }
+    public boolean isLazy() { return lazy; }
 }

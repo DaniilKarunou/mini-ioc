@@ -1,6 +1,6 @@
 package com.miniioc.core.context;
 
-public class BeanCreationException extends Exception {
+public class BeanCreationException extends RuntimeException {
 
     public BeanCreationException(String message) {
         super(message);
