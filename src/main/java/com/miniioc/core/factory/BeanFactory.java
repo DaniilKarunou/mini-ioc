@@ -1,8 +1,8 @@
 package com.miniioc.core.factory;
 
-import com.miniioc.core.annotation.ScopeType;
-import com.miniioc.core.context.ApplicationContext;
-import com.miniioc.core.context.BeanDefinition;
+import com.miniioc.core.annotation.injection.ScopeType;
+import com.miniioc.core.context.beans.ApplicationContext;
+import com.miniioc.core.context.beans.BeanDefinition;
 import com.miniioc.core.lifecycle.BeanLifecycleProcessor;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,12 +21,24 @@ public class BeanFactory {
 
     public Object getBean(Class<?> clazz, ApplicationContext context) {
         BeanDefinition bd = definitions.get(clazz);
+        if (bd == null) {
+            throw new RuntimeException("No bean definition found for " + clazz.getName());
+        }
 
         if (bd.getScope() == ScopeType.SINGLETON) {
-            return singletonCache.computeIfAbsent(clazz,
-                    c -> initialize(bd, context));
+            Object existing = singletonCache.get(clazz);
+            if (existing != null) {
+                return existing;
+            }
+
+            singletonCache.put(clazz, null);
+            Object bean = initialize(bd, context);
+            singletonCache.put(clazz, bean);
+
+            return bean;
+        } else {
+            return initialize(bd, context);
         }
-        return initialize(bd, context);
     }
 
     private Object initialize(BeanDefinition bd, ApplicationContext context) {

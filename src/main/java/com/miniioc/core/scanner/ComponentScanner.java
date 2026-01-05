@@ -1,7 +1,7 @@
 package com.miniioc.core.scanner;
 
-import com.miniioc.core.annotation.Component;
-import com.miniioc.core.annotation.Lazy;
+import com.miniioc.core.annotation.injection.Component;
+import com.miniioc.core.annotation.injection.Lazy;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;

@@ -1,6 +1,6 @@
 package com.miniioc.core.lifecycle;
 
-import com.miniioc.core.annotation.PostConstruct;
+import com.miniioc.core.annotation.request.PostConstruct;
 
 import java.lang.reflect.Method;
 
