@@ -9,7 +9,6 @@ import com.miniioc.core.lifecycle.BeanLifecycleProcessor;
 import com.miniioc.core.scanner.ComponentScanner;
 import com.miniioc.core.scanner.PackageScanner;
 import com.miniioc.util.BeanUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
