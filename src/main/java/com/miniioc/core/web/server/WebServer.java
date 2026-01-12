@@ -7,6 +7,8 @@ import com.miniioc.core.web.RequestContext;
 import com.miniioc.util.json.JsonMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,7 +44,7 @@ public class WebServer {
             for (EndpointHandler handler : urlMappings) {
                 if (handler.matches(requestMethod, requestPath)) {
                     matchedHandler = handler;
-                    pathVariables = handler.getPathPattern().extract(requestPath);
+                    pathVariables = handler.extractPathVariables(requestPath);
                     break;
                 }
             }
@@ -85,10 +87,15 @@ public class WebServer {
         return map;
     }
 
-    private void sendResponse(HttpExchange exchange, String body) throws Exception {
-        exchange.sendResponseHeaders(200, body.getBytes(StandardCharsets.UTF_8).length);
-        try (var os = exchange.getResponseBody()) {
-            os.write(body.getBytes(StandardCharsets.UTF_8));
+    private void sendResponse(HttpExchange exchange, String body) {
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        try {
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (var os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        } catch (IOException e) {
+            throw new ResponseWriteException("Failed to write HTTP response", e);
         }
     }
 }

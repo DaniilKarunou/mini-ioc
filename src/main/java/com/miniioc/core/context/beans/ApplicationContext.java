@@ -8,6 +8,8 @@ import com.miniioc.core.factory.BeanFactory;
 import com.miniioc.core.lifecycle.BeanLifecycleProcessor;
 import com.miniioc.core.scanner.ComponentScanner;
 import com.miniioc.core.scanner.PackageScanner;
+
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +72,8 @@ public class ApplicationContext {
 
     public Object createBean(Class<?> clazz) {
         try {
-            var constructor = clazz.getConstructors()[0];
-            var paramTypes = constructor.getParameterTypes();
+            Constructor<?> constructor = ConstructorResolver.resolve(clazz);
+            Class<?>[] paramTypes = constructor.getParameterTypes();
             Object[] paramInstances = new Object[paramTypes.length];
 
             logger.info(() -> "Creating bean: " + clazz.getName() + " with dependencies:");

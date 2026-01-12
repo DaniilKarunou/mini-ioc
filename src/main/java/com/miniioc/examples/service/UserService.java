@@ -8,7 +8,7 @@ import com.miniioc.examples.model.User;
 import java.util.*;
 
 @Service
-@Scope(ScopeType.SINGLETON)
+@Scope(ScopeType.PROTOTYPE)
 public class UserService {
     private final Map<Integer, User> users = new HashMap<>();
     private int nextId = 1;

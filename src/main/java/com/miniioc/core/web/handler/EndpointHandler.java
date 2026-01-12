@@ -2,7 +2,6 @@ package com.miniioc.core.web.handler;
 
 import com.miniioc.core.web.RequestContext;
 import com.miniioc.core.web.resolver.ParameterResolver;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -12,49 +11,48 @@ public class EndpointHandler {
 
     private final Object controller;
     private final Method method;
-    private final String httpMethod;
-    private final PathPattern pathPattern;
-    private final Map<Class<? extends Annotation>, ParameterResolver> resolvers;
+    private final RequestMappingInfo mapping;
+    private final List<ParameterResolver> resolvers;
 
-    public EndpointHandler(Object controller, Method method, String httpMethod, String path,
-                           Map<Class<? extends Annotation>, ParameterResolver> resolvers) {
+    public EndpointHandler(
+            Object controller,
+            Method method,
+            RequestMappingInfo mapping,
+            List<ParameterResolver> resolvers
+    ) {
         this.controller = controller;
         this.method = method;
-        this.httpMethod = httpMethod;
-        this.pathPattern = new PathPattern(path);
+        this.mapping = mapping;
         this.resolvers = resolvers;
     }
 
-    public boolean matches(String requestMethod, String requestPath) {
-        return httpMethod.equalsIgnoreCase(requestMethod) && pathPattern.matches(requestPath);
+    public boolean matches(String httpMethod, String path) {
+        return mapping.matches(httpMethod, path);
     }
 
-    public Object invoke(RequestContext ctx) throws EndpointInvocationException {
-        try {
-            Parameter[] params = method.getParameters();
-            Object[] args = new Object[params.length];
+    public Object invoke(RequestContext ctx) throws Exception {
+        Object[] args = resolveArguments(ctx);
+        return method.invoke(controller, args);
+    }
 
-            for (int i = 0; i < params.length; i++) {
-                Parameter p = params[i];
-                args[i] = resolvers.entrySet().stream()
-                        .filter(e -> p.isAnnotationPresent(e.getKey()))
-                        .map(e -> {
-                            try {
-                                return e.getValue().resolve(p, ctx);
-                            } catch (Exception ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        })
-                        .findFirst()
-                        .orElse(null);
-            }
+    private Object[] resolveArguments(RequestContext ctx) throws Exception {
+        Object[] args = new Object[method.getParameterCount()];
+        Parameter[] params = method.getParameters();
 
-            return method.invoke(controller, args);
-        } catch (Exception e) {
-            throw new EndpointInvocationException(
-                    "Failed to invoke endpoint " + httpMethod + " " + pathPattern.getTemplate(), e);
+        for (int i = 0; i < params.length; i++) {
+            Parameter p = params[i];
+
+            args[i] = resolvers.stream()
+                    .filter(r -> r.supports(p))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new IllegalStateException("No resolver for " + p))
+                    .resolve(p, ctx);
         }
+        return args;
     }
 
-    public PathPattern getPathPattern() { return pathPattern; }
+    public Map<String, String> extractPathVariables(String path) {
+        return mapping.getPathPattern().extract(path);
+    }
 }

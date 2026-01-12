@@ -1,8 +1,8 @@
 package com.miniioc.examples.controller;
 
+import com.miniioc.core.annotation.http.GetMapping;
+import com.miniioc.core.annotation.http.PostMapping;
 import com.miniioc.core.annotation.injection.Controller;
-import com.miniioc.core.annotation.http.Get;
-import com.miniioc.core.annotation.http.Post;
 import com.miniioc.core.annotation.request.RequestParam;
 import com.miniioc.core.annotation.request.PathVariable;
 import com.miniioc.core.annotation.request.RequestBody;
@@ -24,22 +24,22 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Get("/users")
+    @GetMapping("/users")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    @Get("/users/{id}")
+    @GetMapping("/users/{id}")
     public User getUser(@PathVariable("id") int id) {
         return userService.getUserById(id);
     }
 
-    @Post("/users")
+    @PostMapping("/users")
     public User createUser(@RequestBody User user) {
         return userService.createUser(user.getName(), user.getEmail());
     }
 
-    @Post("/users/delete")
+    @PostMapping("/users/delete")
     public String deleteUser(@RequestParam("id") int id) {
         boolean removed = userService.deleteUser(id);
         return removed ? "Deleted user with id " + id : "User not found";
