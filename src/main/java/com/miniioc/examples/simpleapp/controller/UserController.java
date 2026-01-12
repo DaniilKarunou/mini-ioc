@@ -1,4 +1,4 @@
-package com.miniioc.examples.controller;
+package com.miniioc.examples.simpleapp.controller;
 
 import com.miniioc.core.annotation.http.GetMapping;
 import com.miniioc.core.annotation.http.PostMapping;
@@ -9,8 +9,8 @@ import com.miniioc.core.annotation.request.RequestBody;
 import com.miniioc.core.annotation.injection.Scope;
 import com.miniioc.core.annotation.injection.ScopeType;
 
-import com.miniioc.examples.service.UserService;
-import com.miniioc.examples.model.User;
+import com.miniioc.examples.simpleapp.service.UserService;
+import com.miniioc.examples.simpleapp.model.User;
 
 import java.util.List;
 

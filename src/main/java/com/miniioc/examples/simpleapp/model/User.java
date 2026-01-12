@@ -1,4 +1,4 @@
-package com.miniioc.examples.model;
+package com.miniioc.examples.simpleapp.model;
 
 public class User {
     private int id;

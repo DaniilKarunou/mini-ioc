@@ -1,9 +1,9 @@
-package com.miniioc.examples.service;
+package com.miniioc.examples.simpleapp.service;
 
 import com.miniioc.core.annotation.injection.Service;
 import com.miniioc.core.annotation.injection.Scope;
 import com.miniioc.core.annotation.injection.ScopeType;
-import com.miniioc.examples.model.User;
+import com.miniioc.examples.simpleapp.model.User;
 
 import java.util.*;
 

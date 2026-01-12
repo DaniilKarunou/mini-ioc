@@ -1,4 +1,4 @@
-package com.miniioc.examples;
+package com.miniioc.examples.simpleapp;
 
 import com.miniioc.boot.MiniSpringApplication;
 
