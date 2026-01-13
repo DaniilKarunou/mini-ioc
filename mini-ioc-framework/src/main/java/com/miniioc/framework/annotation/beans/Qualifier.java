@@ -1,0 +1,9 @@
+package com.miniioc.framework.annotation.beans;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Qualifier {
+    String value();
+}
