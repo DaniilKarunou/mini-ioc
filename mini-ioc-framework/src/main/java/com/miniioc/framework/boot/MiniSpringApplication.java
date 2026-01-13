@@ -8,15 +8,16 @@ import com.miniioc.framework.web.registry.EndpointRegistry;
 import com.miniioc.framework.web.resolver.*;
 import com.miniioc.framework.web.server.WebServer;
 import com.miniioc.framework.util.mapper.TypeMapperRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.logging.Logger;
 
 
 public class MiniSpringApplication {
 
     private MiniSpringApplication(){}
 
-    private static final Logger logger = Logger.getLogger(MiniSpringApplication.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MiniSpringApplication.class);
 
     public static void run(Class<?> appClass) throws Exception {
         ApplicationContext context = new ApplicationContext();

@@ -1,36 +1,30 @@
 package com.miniioc.framework.web.exception;
 
-import com.sun.net.httpserver.HttpExchange;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.miniioc.framework.web.RequestContext;
 
 public class DefaultExceptionHandler implements ExceptionHandler {
 
     @Override
-    public boolean supports(Exception ex) {
+    public boolean supports(Throwable ex) {
         return true;
     }
 
     @Override
-    public void handle(Exception ex, HttpExchange exchange) {
-        int status;
-        String body;
-
+    public ErrorResponse handle(Throwable ex, RequestContext ctx) {
         if (ex instanceof HttpException he) {
-            status = he.getStatus();
-            body = he.getBody();
-        } else {
-            status = 500;
-            body = "Internal Server Error";
+            return new ErrorResponse(
+                    he.getStatus(),
+                    he.getBody(),
+                    he.getClass().getSimpleName(),
+                    ctx.path()
+            );
         }
 
-        try {
-            exchange.sendResponseHeaders(status, body.getBytes(StandardCharsets.UTF_8).length);
-            try (var os = exchange.getResponseBody()) {
-                os.write(body.getBytes(StandardCharsets.UTF_8));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return new ErrorResponse(
+                500,
+                "Internal Server Error",
+                ex.getClass().getSimpleName(),
+                ctx.path()
+        );
     }
 }

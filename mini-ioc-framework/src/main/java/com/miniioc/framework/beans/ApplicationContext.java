@@ -9,16 +9,17 @@ import com.miniioc.framework.context.lifecycle.BeanLifecycleProcessor;
 import com.miniioc.framework.scanner.ComponentScanner;
 import com.miniioc.framework.scanner.PackageScanner;
 import com.miniioc.framework.util.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static java.beans.Introspector.decapitalize;
 
 public class ApplicationContext {
 
-    private static final Logger logger = Logger.getLogger(ApplicationContext.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
 
     private final Map<String, BeanDefinition> beanDefinitions = new HashMap<>();
     private final BeanLifecycleProcessor lifecycleProcessor = new BeanLifecycleProcessor();
@@ -34,8 +35,9 @@ public class ApplicationContext {
         BeanDefinition bd = new BeanDefinition(name, clazz, scope, lazy, qualifier);
         beanDefinitions.put(name, bd);
 
-        logger.info(() -> "Registering bean: " + clazz.getName() + ", name=" + name +
-                ", scope=" + scope + ", lazy=" + lazy + ", qualifier=" + qualifier);
+        logger.info("Registering bean: {}, name={}, scope={}, lazy={}, qualifier={}",
+                clazz.getName(), name, scope, lazy, qualifier
+        );
     }
 
     public void registerBean(Class<?> clazz, boolean lazy) {

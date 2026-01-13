@@ -1,8 +1,9 @@
 package com.miniioc.framework.web.exception;
 
-import com.sun.net.httpserver.HttpExchange;
+import com.miniioc.framework.web.RequestContext;
+
 
 public interface ExceptionHandler {
-    boolean supports(Exception ex);
-    void handle(Exception ex, HttpExchange exchange);
+    boolean supports(Throwable ex);
+    ErrorResponse handle(Throwable ex, RequestContext ctx);
 }
